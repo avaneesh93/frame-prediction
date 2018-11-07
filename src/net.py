@@ -2,13 +2,13 @@ import tensorflow as tf
 
 def build_encoder_net(x, dt, is_training):
     c1 = tf.layers.conv2d(x, 32, (5,5), padding='SAME', activation=tf.nn.relu)
-    p1 = tf.layers.max_pooling2d(c1, 2, 2)
+    p1 = tf.layers.conv2d(c1, 32, (2,2), padding='VALID')
 
     c2 = tf.layers.conv2d(p1, 64, (5,5), padding='SAME', activation=tf.nn.relu)
-    p2 = tf.layers.max_pooling2d(c2, 2, 2)
+    p2 = tf.layers.conv2d(c2, 64, (2,2), padding='VALID')
 
     c3 = tf.layers.conv2d(p2, 128, (1,1), padding='SAME', activation=tf.nn.relu)
-    p3 = tf.layers.max_pooling2d(c3, 2, 2)
+    p3 = tf.layers.max_pooling2d(c3, 128, (2,2), padding='VALID')
 
     flat = tf.layers.flatten(p3)
 
