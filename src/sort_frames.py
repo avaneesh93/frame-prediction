@@ -52,5 +52,5 @@ def sort(frames_dir, seq):
 
 if __name__ == '__main__':
     frames_dir = '../datasets'
-    seq = "seq.txt"
+    seq = "../seq.txt"
     sort(frames_dir, seq)

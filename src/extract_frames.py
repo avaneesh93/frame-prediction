@@ -14,7 +14,7 @@ def extract(vids_dir, frames_dir):
         count = 1
         while success:
           filepath = '{}/{}/{}.jpg'.format(frames_dir, vid, count)
-          image = image[0:120, 20:140]
+          image = cv2.resize(image, (120,120))
           cv2.imwrite(filepath, image)     
           success,image = vidcap.read()
           if not success:
