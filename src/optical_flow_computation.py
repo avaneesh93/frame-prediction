@@ -56,6 +56,3 @@ def compute_optical_flow(x):
     optical_flow = cv.cvtColor(rgb, cv.COLOR_RGB2GRAY).reshape((1, H, W))
     
     return optical_flow
-
-
-     
