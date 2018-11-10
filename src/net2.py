@@ -2,9 +2,10 @@ import tensorflow as tf
 import numpy as np
 from dataset import *
 import cv2
+from optical_flow_computation import *
 import pickle
 
-def build_encoder_net(x, dt, is_training):
+def build_encoder_net(x, dt, ofp, is_training):
     c1 = tf.layers.conv2d(x, 32, (5,5), padding='SAME', activation=tf.nn.relu)
     p1 = tf.layers.conv2d(c1, 32, (2,2), strides=2, padding='VALID')
 
@@ -23,7 +24,9 @@ def build_encoder_net(x, dt, is_training):
     fct2 = tf.layers.dense(fct1, 64)
     fct3 = tf.layers.dense(fct2, 64)
 
-    out = tf.keras.layers.concatenate([fc2, fct3], axis=1)
+    fcop = tf.layers.flatten(ofp)
+
+    out = tf.keras.layers.concatenate([fc2, fct3, fcop], axis=1)
     return out
 
 
@@ -49,14 +52,16 @@ def train(num_epoch, lr, pt, ft, bs, print_every):
     with tf.device('/gpu:0'):
         x = tf.placeholder(tf.float32, [None, 120, 120, 1])
         y = tf.placeholder(tf.float32, [None, 120, 120, 1])
+        ofp = tf.placeholder(tf.float32, [None, 120, 120, 1])
+        off = tf.placeholder(tf.float32, [None, 120, 120, 1])
         dt = tf.placeholder(tf.float32, [None, 1])
         is_training = tf.placeholder(tf.bool, name='is_training')
         learning_rate = tf.placeholder(tf.float32)
 
-        e = build_encoder_net(x, dt, is_training)
+        e = build_encoder_net(x, dt, ofp, is_training)
         out = build_decoder_net(e, is_training)
 
-        loss_mat = tf.losses.mean_squared_error(labels = y, predictions = out)
+        loss_mat = tf.losses.mean_squared_error(labels = y, predictions = out) #, weights = off
         loss = tf.reduce_mean(loss_mat)
 
         optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
@@ -69,18 +74,25 @@ def train(num_epoch, lr, pt, ft, bs, print_every):
         ds = Dataset("../datasets/walking")
         x_t = None
         y_t = None
+        ofp_t = None
         dt_t = np.full((1, 1), ft)
         for i in range(num_epoch):
             ds.set_values(bs, ft, pt)
             for t, X in enumerate(ds):
-                # if t == 0:
-                #     x_t = X[0][pt]
-                #     y_t = X[0][-1]
                 x_np = np.array([X[index][pt] for index in range(len(X))])
                 y_np = np.array([X[index][-1] for index in range(len(X))])
+                ofp_np = np.array([Optical_Flow.compute(X[index][:pt+1]) for index in range(len(X))])
+                off_np = np.array([Optical_Flow.compute(X[index][pt:]) for index in range(len(X))])
                 dt_np = np.full((len(X), 1), ft)
 
-                feed_dict = {x:x_np, y:y_np, dt:dt_np, is_training:1, learning_rate:lr}
+                if t == 0:
+                    x_t = x_np
+                    y_t = y_np
+                    ofp_t = ofp_np
+                    dt_t = dt_np
+                    continue
+
+                feed_dict = {x:x_np, y:y_np, dt:dt_np, ofp:ofp_np, off:off_np, is_training:1, learning_rate:lr}
                 loss_np,_ = sess.run([loss, train_op], feed_dict=feed_dict)
 
                 if t % print_every == 0:
@@ -89,28 +101,28 @@ def train(num_epoch, lr, pt, ft, bs, print_every):
             # save_path = tf.train.Saver().save(sess, "../model/onet.ckpt")
             # print("Model saved at {}".format(save_path))
             print("COMPLETED EPOCH {}".format(i))
+        
+        with open("x_t", 'wb') as f:
+            pickle.dump(x_t, f)
+        with open("y_t", 'wb') as f:
+            pickle.dump(y_t, f)
+        with open("dt_t", 'wb') as f:
+            pickle.dump(dt_t, f)
 
-        with open("x_t", 'rb') as f:
-            x_t = pickle.load(f)
-        with open("y_t", 'rb') as f:
-            y_t = pickle.load(f)
-        with open("dt_t", 'rb') as f:
-            dt_t = pickle.load(f)
-            
-        feed_dict = {x:x_t, y:y_t, dt:dt_t, is_training:1}
+        feed_dict = {x:x_t, y:y_t, dt:dt_t, ofp:ofp_t, is_training:1}
+        out_np = sess.run(out, feed_dict = feed_dict)
 
         for index in range(x_t.shape[0]):
-            out_np = sess.run(out, feed_dict = feed_dict)
             #print("Writing input test image")
-            cv2.imwrite("in_orig{}.jpg".format(index), x_t[index])
+            cv2.imwrite("in{}.jpg".format(index), x_t[index])
 
             out_np = out_np/(np.max(out_np, axis=(1,2,3))[:, None, None, None])
             out_np = out_np*255
             #print("Writing predicted output test")
-            cv2.imwrite("out_pred_orig{}.jpg".format(index), out_np[index].astype(dtype=np.uint8))
+            cv2.imwrite("out_pred{}.jpg".format(index), out_np[index].astype(dtype=np.uint8))
 
             #print("Writing groundtruth output test")
-            cv2.imwrite("out_real_orig{}.jpg".format(index), y_t[index])
+            cv2.imwrite("out_real{}.jpg".format(index), y_t[index])
 
 if __name__ == '__main__':
     train(num_epoch=5, lr=5e-4, pt=5, ft=1, bs=16, print_every=15)
