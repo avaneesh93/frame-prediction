@@ -64,7 +64,10 @@ def train_model(X_train, y_train, delta_t, optical_flows_train, motion_represent
         param print_every : prints training stats after each set of this number of epochs; type --> int
     """     
     
-    save_path = os.path.dirname(os.getcwd()) + '/results'   
+    save_path = os.path.dirname(os.getcwd()) + '/results'
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    
     tf.reset_default_graph()
     
     with tf.device('/gpu:0'):

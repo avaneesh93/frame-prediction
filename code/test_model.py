@@ -33,6 +33,13 @@ def test_model(X_test, y_test, dt, optical_flows_test):
     """
     
     save_path = os.path.dirname(os.getcwd()) + '/results'
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
+        os.mkdir(save_path + '/pickled')
+        os.mkdir(save_path + '/inputs')
+        os.mkdir(save_path + '/predictions')
+        os.mkdir(save_path + '/targets')
+        
     restore_path = os.path.dirname(os.getcwd()) + '/results/model.ckpt' 
     tf.reset_default_graph()
     
@@ -66,7 +73,7 @@ def test_model(X_test, y_test, dt, optical_flows_test):
         test_predictions = sess.run(model_out, feed_dict = feed) * 255.0 # these are normalized outputs. Transform back.
         
         # save predictions to avoid re-run
-        with open(save_path + '/test_predictions.pkl', 'wb') as t:
+        with open(save_path + 'pickled/test_predictions.pkl', 'wb') as t:
             pickle.dump(test_predictions, t) 
         model_logger.info('Dumped test predictions.')
  

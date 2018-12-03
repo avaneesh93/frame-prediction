@@ -192,7 +192,9 @@ class dataset_loader():
                     
             # Lastly, pickle the data for later reuse
             
-            save_path = load_path 
+            save_path = load_path
+            if not os.path.exists(save_path):
+                os.makedirs(save_path)
             
             with open(save_path + '/X_train_dt_{}.pkl'.format(int(self.delta_t)), 'wb') as xtr:
                 pickle.dump(self.X_train, xtr, protocol = pickle.HIGHEST_PROTOCOL)
