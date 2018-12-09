@@ -12,6 +12,7 @@ from train_model import *
 from test_model import *
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 # first load the data
 print('Loading data...')
@@ -45,6 +46,7 @@ for lr in learning_rates:
     if epoch_losses[-1] < best_loss:
         best_loss = epoch_losses[-1]
         best_rate = lr  
+    np.save(os.path.dirname(os.getcwd()) + '/tune/{}_lr'.format(lr), epoch_losses)
 print('Best learning rate found for 100 epochs of training {}'.format(best_rate))
 
 plt.figure(figsize=(14, 8))
