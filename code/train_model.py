@@ -89,17 +89,14 @@ def train_model(X_train, y_train, delta_t, optical_flows_train, motion_represent
                             optical_flows_batch : OF_[j], motion_representations_batch: MR_[j], is_training : True, learning_rate : lr}
                     
                 batch_loss, _ =  sess.run([loss, train_step], feed_dict = feed)
-                model_logger.info('Completed iteration {}'.format(i * j))
+                # model_logger.info('Completed iteration {}'.format(i * j))
    
             if tune:
                 all_losses.append(batch_loss)    
-            model_logger.info('Completed epoch {}'.format(i))    
-            
             if i % print_every == 0:
-                    
+                model_logger.info('Completed epoch {}'.format(i))    
                 model_logger.info('Loss after epoch {} : {}'.format(i, batch_loss))
-                
-                
+      
         model_logger.info("All epochs of training now complete.")
         
         if not tune:
