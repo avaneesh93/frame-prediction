@@ -14,7 +14,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # first load the data
+print('Loading data...')
 data = dataset_loader(delta_t = 40.0, k = 10, offset = 10) 
+print('Loaded data!')
 
 # setup some data specific variables
 dt = data.delta_t
