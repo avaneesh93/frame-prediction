@@ -57,13 +57,13 @@ class dataset_loader():
         
         load_path = os.path.dirname(os.getcwd()) + '/pickles'
         #load_path = '../pickles' while running from a script
-        X_train_path = load_path + '/X_train_dt_{}.pkl'.format(int(self.delta_t))
-        y_train_path = load_path + '/y_train_dt_{}.pkl'.format(int(self.delta_t))
-        X_test_path = load_path + '/X_test_dt_{}.pkl'.format(int(self.delta_t))
-        y_test_path = load_path + '/y_test_dt_{}.pkl'.format(int(self.delta_t))
-        optical_flows_train_path = load_path + '/optical_flows_train_dt_{}.pkl'.format(int(self.delta_t))
-        optical_flows_test_path = load_path + '/optical_flows_test_dt_{}.pkl'.format(int(self.delta_t))
-        motion_representations_train_path = load_path + '/motion_representations_train_dt_{}.pkl'.format(int(self.delta_t))
+        X_train_path = load_path + '/K_X_train_dt_{}'.format(int(self.delta_t))
+        y_train_path = load_path + '/K_y_train_dt_{}'.format(int(self.delta_t))
+        X_test_path = load_path + '/K_X_test_dt_{}'.format(int(self.delta_t))
+        y_test_path = load_path + '/K_y_test_dt_{}'.format(int(self.delta_t))
+        optical_flows_train_path = load_path + '/K_optical_flows_train_dt_{}'.format(int(self.delta_t))
+        optical_flows_test_path = load_path + '/K_optical_flows_test_dt_{}'.format(int(self.delta_t))
+        motion_representations_train_path = load_path + '/K_motion_representations_train_dt_{}'.format(int(self.delta_t))
         
         # First, lookup if pickled data is available for loading
         if os.path.exists(X_train_path) and os.path.exists(y_train_path) and os.path.exists(X_test_path) and  os.path.exists(y_test_path) \
@@ -72,13 +72,21 @@ class dataset_loader():
             data_logger.info('Pickled data available. Loading now!')
             
             #data_logger.info("Custom loading. Pickle loading couldn't handle this huge data size!")
-            self.X_train = try_to_load_as_pickled_object_or_None(X_train_path)
-            self.y_train = try_to_load_as_pickled_object_or_None(y_train_path)
-            self.X_test = try_to_load_as_pickled_object_or_None(X_test_path)
-            self.y_test = try_to_load_as_pickled_object_or_None(y_test_path)
-            self.optical_flows_train = try_to_load_as_pickled_object_or_None(optical_flows_train_path)
-            self.optical_flows_test = try_to_load_as_pickled_object_or_None(optical_flows_test_path)
-            self.motion_representations_train = try_to_load_as_pickled_object_or_None(motion_representations_train_path)
+            # self.X_train = try_to_load_as_pickled_object_or_None(X_train_path)
+            # self.y_train = try_to_load_as_pickled_object_or_None(y_train_path)
+            # self.X_test = try_to_load_as_pickled_object_or_None(X_test_path)
+            # self.y_test = try_to_load_as_pickled_object_or_None(y_test_path)
+            # self.optical_flows_train = try_to_load_as_pickled_object_or_None(optical_flows_train_path)
+            # self.optical_flows_test = try_to_load_as_pickled_object_or_None(optical_flows_test_path)
+            # self.motion_representations_train = try_to_load_as_pickled_object_or_None(motion_representations_train_path)
+
+            self.X_train = try_to_load_as_pickled_object_or_None(load_path, 'X_train_dt_{}'.format(int(self.delta_t)))
+            self.y_train = try_to_load_as_pickled_object_or_None(load_path, 'y_train_dt_{}'.format(int(self.delta_t)))
+            self.X_test = try_to_load_as_pickled_object_or_None(load_path, 'X_test_dt_{}'.format(int(self.delta_t)))
+            self.y_test = try_to_load_as_pickled_object_or_None(load_path, 'y_test_dt_{}'.format(int(self.delta_t)))
+            self.optical_flows_train = try_to_load_as_pickled_object_or_None(load_path, 'optical_flows_train_dt_{}'.format(int(self.delta_t)))
+            self.optical_flows_test = try_to_load_as_pickled_object_or_None(load_path, 'optical_flows_test_dt_{}'.format(int(self.delta_t)))
+            self.motion_representations_train = try_to_load_as_pickled_object_or_None(load_path, 'motion_representations_train_dt_{}'.format(int(self.delta_t)))
             
                 
                 
@@ -199,13 +207,21 @@ class dataset_loader():
             save_path = load_path 
         
             #data_logger.info("Custom dumping. Pickle dunping couldn't handle this huge data size!")
-            save_as_pickled_object(self.X_train, save_path + '/X_train_dt_{}.pkl'.format(int(self.delta_t)))
-            save_as_pickled_object(self.y_train, save_path + '/y_train_dt_{}.pkl'.format(int(self.delta_t)))
-            save_as_pickled_object(self.X_test, save_path + '/X_test_dt_{}.pkl'.format(int(self.delta_t)))
-            save_as_pickled_object(self.y_test, save_path + '/y_test_dt_{}.pkl'.format(int(self.delta_t)))
-            save_as_pickled_object(self.optical_flows_train, save_path + '/optical_flows_train_dt_{}.pkl'.format(int(self.delta_t)))
-            save_as_pickled_object(self.optical_flows_test, save_path + '/optical_flows_test_dt_{}.pkl'.format(int(self.delta_t)))
-            save_as_pickled_object(self.motion_representations_train, save_path + '/motion_representations_train_dt_{}.pkl'.format(int(self.delta_t)))
+            # save_as_pickled_object(self.X_train, save_path + '/X_train_dt_{}.pkl'.format(int(self.delta_t)))
+            # save_as_pickled_object(self.y_train, save_path + '/y_train_dt_{}.pkl'.format(int(self.delta_t)))
+            # save_as_pickled_object(self.X_test, save_path + '/X_test_dt_{}.pkl'.format(int(self.delta_t)))
+            # save_as_pickled_object(self.y_test, save_path + '/y_test_dt_{}.pkl'.format(int(self.delta_t)))
+            # save_as_pickled_object(self.optical_flows_train, save_path + '/optical_flows_train_dt_{}.pkl'.format(int(self.delta_t)))
+            # save_as_pickled_object(self.optical_flows_test, save_path + '/optical_flows_test_dt_{}.pkl'.format(int(self.delta_t)))
+            # save_as_pickled_object(self.motion_representations_train, save_path + '/motion_representations_train_dt_{}.pkl'.format(int(self.delta_t)))
+
+            save_as_pickled_object(self.X_train, save_path, 'X_train_dt_{}'.format(int(self.delta_t)))
+            save_as_pickled_object(self.y_train, save_path, 'y_train_dt_{}'.format(int(self.delta_t)))
+            save_as_pickled_object(self.X_test, save_path, 'X_test_dt_{}'.format(int(self.delta_t)))
+            save_as_pickled_object(self.y_test, save_path, 'y_test_dt_{}'.format(int(self.delta_t)))
+            save_as_pickled_object(self.optical_flows_train, save_path, 'optical_flows_train_dt_{}'.format(int(self.delta_t)))
+            save_as_pickled_object(self.optical_flows_test, save_path, 'optical_flows_test_dt_{}'.format(int(self.delta_t)))
+            save_as_pickled_object(self.motion_representations_train, save_path, 'motion_representations_train_dt_{}'.format(int(self.delta_t)))
             
                 
         data_logger.info('Success! Completed loading the data!')

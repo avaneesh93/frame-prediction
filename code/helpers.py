@@ -9,34 +9,42 @@ Created on Sat Dec  8 12:12:58 2018
 import os
 import sys
 import pickle
+import klepto
 import numpy as np
 
-def save_as_pickled_object(obj, filepath):
+def save_as_pickled_object(obj, filepath, var_name = None):
     """
     This is a defensive way to write pickle.write, allowing for very large files on all platforms
     """
-    max_bytes = 2**31 - 1
-    bytes_out = pickle.dumps(obj)
-    n_bytes = sys.getsizeof(bytes_out)
-    with open(filepath, 'wb') as f_out:
-        for idx in range(0, n_bytes, max_bytes):
-            f_out.write(bytes_out[idx:idx+max_bytes])
+    # max_bytes = 2**31 - 1
+    # bytes_out = pickle.dumps(obj)
+    # n_bytes = sys.getsizeof(bytes_out)
+    # with open(filepath, 'wb') as f_out:
+    #     for idx in range(0, n_bytes, max_bytes):
+    #         f_out.write(bytes_out[idx:idx+max_bytes])
+    d = klepto.archives.dir_archive(filepath, cached=True, serialized=True)
+    d[var_name] = obj
+    d.dump()
+    d.clear()
 
 
-def try_to_load_as_pickled_object_or_None(filepath):
+def try_to_load_as_pickled_object_or_None(filepath, var_name = None):
     """
     This is a defensive way to write pickle.load, allowing for very large files on all platforms
     """
-    max_bytes = 2**31 - 1
+    # max_bytes = 2**31 - 1
     
-    input_size = os.path.getsize(filepath)
-    bytes_in = bytearray(0)
-    with open(filepath, 'rb') as f_in:
-        for _ in range(0, input_size, max_bytes):
-            bytes_in += f_in.read(max_bytes)
-    obj = pickle.loads(bytes_in)
-    
-    
+    # input_size = os.path.getsize(filepath)
+    # bytes_in = bytearray(0)
+    # with open(filepath, 'rb') as f_in:
+    #     for _ in range(0, input_size, max_bytes):
+    #         bytes_in += f_in.read(max_bytes)
+    # obj = pickle.loads(bytes_in)
+
+    d = klepto.archives.dir_archive(filepath, cached=True, serialized=True)
+    d.load(var_name)
+    obj = d[var_name]
+    d.clear()
     return obj
 
 
