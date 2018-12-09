@@ -199,13 +199,13 @@ class dataset_loader():
             save_path = load_path 
         
             #data_logger.info("Custom dumping. Pickle dunping couldn't handle this huge data size!")
-            # save_as_pickled_object(self.X_train, save_path + '/X_train_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.y_train, save_path + '/y_train_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.X_test, save_path + '/X_test_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.y_test, save_path + '/y_test_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.optical_flows_train, save_path + '/optical_flows_train_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.optical_flows_test, save_path + '/optical_flows_test_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.motion_representations_train, save_path + '/motion_representations_train_dt_{}.pkl'.format(int(self.delta_t)))
+            save_as_pickled_object(self.X_train, save_path + '/X_train_dt_{}.pkl'.format(int(self.delta_t)))
+            save_as_pickled_object(self.y_train, save_path + '/y_train_dt_{}.pkl'.format(int(self.delta_t)))
+            save_as_pickled_object(self.X_test, save_path + '/X_test_dt_{}.pkl'.format(int(self.delta_t)))
+            save_as_pickled_object(self.y_test, save_path + '/y_test_dt_{}.pkl'.format(int(self.delta_t)))
+            save_as_pickled_object(self.optical_flows_train, save_path + '/optical_flows_train_dt_{}.pkl'.format(int(self.delta_t)))
+            save_as_pickled_object(self.optical_flows_test, save_path + '/optical_flows_test_dt_{}.pkl'.format(int(self.delta_t)))
+            save_as_pickled_object(self.motion_representations_train, save_path + '/motion_representations_train_dt_{}.pkl'.format(int(self.delta_t)))
             
                 
         data_logger.info('Success! Completed loading the data!')
