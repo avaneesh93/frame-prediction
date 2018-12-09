@@ -21,7 +21,7 @@ data_logger = logging.getLogger(__name__ + '.data')
 
 class dataset_loader():
     
-    def __init__(self, delta_t, k, offset):
+    def __init__(self, delta_t, k, offset, pickle_batch_size = 150):
 
         """ *arg data_dir : the source directory for the data, as a pathname ; type --> str
             
@@ -34,6 +34,8 @@ class dataset_loader():
             *arg offset : a value indicating the number of images to skip from every image sequence directory.
                         i.e, for every 'n' images in any sequence directory, images(1,..k) and images(n-k,...n) 
                         will be skipped. (to ignore images which do not contain potential motion information)   
+
+            *arg pickle_batch_size : Number of sequences after the processing of which we attempt to save the sets to disk
         """
         
         self.path =  os.path.dirname(os.getcwd()) + '/datasets' # --> root directory + '/datasets'
@@ -42,12 +44,9 @@ class dataset_loader():
         self.future_frame_number = math.ceil((self.delta_t / 1000.0) * 24)
         self.k = k
         self.offset = offset
-        self.X = {}
-        self.y = {}
-        self.optical_flows = {}
-        self.motion_representations = {}
         self.means = {}
         self.stdevs = {}
+        self.pickle_batch_size = pickle_batch_size
         self.load_data()
         
     
@@ -113,15 +112,7 @@ class dataset_loader():
                     pass
                 
                 else: 
-                    
-                    if not action_dir_name in self.X.keys():
-                        self.X[action_dir_name] = []
-                    if not action_dir_name in self.y.keys():
-                        self.y[action_dir_name] = []
-                    if not action_dir_name in self.optical_flows.keys():
-                        self.optical_flows[action_dir_name] = []
-                    if not action_dir_name in self.motion_representations.keys():
-                        self.motion_representations[action_dir_name] = []
+                    X, y, optical_flows, motion_representations = self.init_dicts(action_dir_name)
                     
                     action_path = os.path.join(self.path, action_dir_name)
                     
@@ -152,79 +143,87 @@ class dataset_loader():
                                     # note here that we will need images from kth frame onward for optical flow inputs to be available as well !
                                     # also note that we will only require images for which targets(img[current_time_step + delta_t]) exist !
                                     if img_idx + self.future_frame_number < seq_size - self.offset:
-                                        self.X[action_dir_name].append(images[img_idx])
-                                        self.y[action_dir_name].append(images[img_idx + int(self.future_frame_number)])
+                                        X[action_dir_name].append(images[img_idx])
+                                        y[action_dir_name].append(images[img_idx + int(self.future_frame_number)])
                                         # (below) calculates and gathers the optical flow input for this image frame using 'k' previous image frames
-                                        self.optical_flows[action_dir_name].append(compute_optical_flow(np.array(images[img_idx - self.k : img_idx + 1]))) 
+                                        optical_flows[action_dir_name].append(compute_optical_flow(np.array(images[img_idx - self.k : img_idx + 1]))) 
                                         # (below) calculates and gathers the 'motion representation' for this image frame using all sequential future image frames until target image
-                                        self.motion_representations[action_dir_name].append(compute_optical_flow(np.array(images[img_idx: img_idx + int(self.future_frame_number)+ 1])))
+                                        motion_representations[action_dir_name].append(compute_optical_flow(np.array(images[img_idx: img_idx + int(self.future_frame_number)+ 1])))
                     
                                 data_logger.info('Sequence loading complete!')
-                            
-                    # Now, we have X, y and other motion information from this action directory 
-                    # Note that action directories have unique pathnames. So, no overwriting or any loss of information will happen in the future, after the below steps
-                    self.X[action_dir_name] = np.asarray(self.X[action_dir_name])
-                    self.y[action_dir_name] = np.asarray(self.y[action_dir_name])
-                    self.optical_flows[action_dir_name] = np.asarray(self.optical_flows[action_dir_name])
-                    self.motion_representations[action_dir_name] = np.asarray(self.motion_representations[action_dir_name])
-                
-            
-                    ########################### Split into training and testing datasets ################################
-            
-                    # normalize and split
-                    
-                    N, H, W, C = self.X[action_dir_name].shape
-                    
-                    self.X[action_dir_name] = self.X[action_dir_name] / 255.0
-                    self.y[action_dir_name] = self.y[action_dir_name] / 255.0
-                    self.optical_flows[action_dir_name] = self.optical_flows[action_dir_name]# already normalized
-                    self.motion_representations[action_dir_name] = self.motion_representations[action_dir_name]#[idxs][0] # already normalized
-                    
-                    # create training and testing datasets with batches for training data
-                    train_size = math.floor(0.8 * N)
-                    
-                    fixed_N = int((math.floor(train_size / 16.0) / (train_size / 16.0)) * train_size)
-                    
-                    # Notice here that we will need images of shape --> (N, H, W, 1)
-                    self.X_train[action_dir_name] = self.X[action_dir_name][:fixed_N][: , : , :, [0]]
-                 
-                    self.y_train[action_dir_name] = self.y[action_dir_name][:fixed_N][: , : , :, [0]]
-                    
-                    self.X_test[action_dir_name] = self.X[action_dir_name][fixed_N:][: , : , :, [0]]
-        
-                    self.y_test[action_dir_name] = self.y[action_dir_name][fixed_N:][: , : , :, [0]]
-                    
-                    self.optical_flows_train[action_dir_name] = self.optical_flows[action_dir_name][:fixed_N]
-                    
-                    self.optical_flows_test[action_dir_name] = self.optical_flows[action_dir_name][fixed_N:]
-                    
-                    # we will not require motion representation inputs during test time !
-                    self.motion_representations_train[action_dir_name] = self.motion_representations[action_dir_name][:fixed_N] 
-    
-            
-            # Lastly, pickle the data for later reuse
-            
-            save_path = load_path 
-        
-            #data_logger.info("Custom dumping. Pickle dunping couldn't handle this huge data size!")
-            # save_as_pickled_object(self.X_train, save_path + '/X_train_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.y_train, save_path + '/y_train_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.X_test, save_path + '/X_test_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.y_test, save_path + '/y_test_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.optical_flows_train, save_path + '/optical_flows_train_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.optical_flows_test, save_path + '/optical_flows_test_dt_{}.pkl'.format(int(self.delta_t)))
-            # save_as_pickled_object(self.motion_representations_train, save_path + '/motion_representations_train_dt_{}.pkl'.format(int(self.delta_t)))
 
-            save_as_pickled_object(self.X_train, save_path, 'X_train_dt_{}'.format(int(self.delta_t)))
-            save_as_pickled_object(self.y_train, save_path, 'y_train_dt_{}'.format(int(self.delta_t)))
-            save_as_pickled_object(self.X_test, save_path, 'X_test_dt_{}'.format(int(self.delta_t)))
-            save_as_pickled_object(self.y_test, save_path, 'y_test_dt_{}'.format(int(self.delta_t)))
-            save_as_pickled_object(self.optical_flows_train, save_path, 'optical_flows_train_dt_{}'.format(int(self.delta_t)))
-            save_as_pickled_object(self.optical_flows_test, save_path, 'optical_flows_test_dt_{}'.format(int(self.delta_t)))
-            save_as_pickled_object(self.motion_representations_train, save_path, 'motion_representations_train_dt_{}'.format(int(self.delta_t)))
-            
+                            if (count-1) % self.pickle_batch_size == 0:
+                                data_logger.info('Writing training and test sets to disk')
+                                self.archive(X, y, optical_flows, motion_representations, action_dir_name, load_path)
+                                X, y, optical_flows, motion_representations = self.init_dicts(action_dir_name)
+                    if len(X[action_dir_name] > 0):
+                        self.archive(X, y, optical_flows, motion_representations, action_dir_name, load_path)
                 
         data_logger.info('Success! Completed loading the data!')
- 
-       
+
+    def archive(self, X, y, optical_flows, motion_representations, action_dir_name, path):
+        X[action_dir_name] = np.asarray(X[action_dir_name])
+        y[action_dir_name] = np.asarray(y[action_dir_name])
+        optical_flows[action_dir_name] = np.asarray(optical_flows[action_dir_name])
+        motion_representations[action_dir_name] = np.asarray(motion_representations[action_dir_name])
+
+        # normalize and split
+
+        N, H, W, C = X[action_dir_name].shape
+                    
+        X[action_dir_name] = X[action_dir_name] / 255.0
+        y[action_dir_name] = y[action_dir_name] / 255.0
+        optical_flows[action_dir_name] = optical_flows[action_dir_name]# already normalized
+        motion_representations[action_dir_name] = motion_representations[action_dir_name]#[idxs][0] # already normalized
+
+        # create training and testing datasets with batches for training data
+        train_size = math.floor(0.8 * N)
+        fixed_N = int((math.floor(train_size / 16.0) / (train_size / 16.0)) * train_size)
+
+        new_X_train = X[action_dir_name][:fixed_N][: , : , :, [0]]
+        new_y_train = y[action_dir_name][:fixed_N][: , : , :, [0]]
+        new_X_test = X[action_dir_name][fixed_N:][: , : , :, [0]]
+        new_y_test = y[action_dir_name][fixed_N:][: , : , :, [0]]
+        new_optical_flows_train = optical_flows[action_dir_name][:fixed_N]
+        new_optical_flows_test = optical_flows[action_dir_name][fixed_N:]
+        new_motion_representations_train = motion_representations[action_dir_name][:fixed_N]
+
+        if action_dir_name in self.X_train:
+            self.X_train[action_dir_name] = np.concatenate((self.X_train[action_dir_name], new_X_train))
+            self.y_train[action_dir_name] = np.concatenate((self.y_train[action_dir_name], new_y_train))
+            self.X_test[action_dir_name] = np.concatenate((self.X_test[action_dir_name], new_X_test))
+            self.y_test[action_dir_name] = np.concatenate((self.y_test[action_dir_name], new_y_test))
+            self.optical_flows_train[action_dir_name] = np.concatenate((self.optical_flows_train[action_dir_name], new_optical_flows_train))
+            self.optical_flows_test[action_dir_name] = np.concatenate((self.optical_flows_test[action_dir_name], new_optical_flows_test))
+            self.motion_representations_train[action_dir_name] = np.concatenate((self.motion_representations_train[action_dir_name], new_motion_representations_train))
+        else:
+            self.X_train[action_dir_name] = new_X_train
+            self.y_train[action_dir_name] = new_y_train
+            self.X_test[action_dir_name] = new_X_test
+            self.y_test[action_dir_name] = new_y_test
+            self.optical_flows_train[action_dir_name] = new_optical_flows_train
+            self.optical_flows_test[action_dir_name] = new_optical_flows_test
+            self.motion_representations_train[action_dir_name] = new_motion_representations_train
+
+        save_as_pickled_object(new_X_train, path, 'X_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        save_as_pickled_object(new_y_train, path, 'y_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        save_as_pickled_object(new_X_test, path, 'X_test_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        save_as_pickled_object(new_y_test, path, 'y_test_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        save_as_pickled_object(new_optical_flows_train, path, 'optical_flows_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        save_as_pickled_object(new_optical_flows_test, path, 'optical_flows_test_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        save_as_pickled_object(new_motion_representations_train, path, 'motion_representations_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
+
+    def init_dicts(self, action_dir_name):
+        # Initializing batches
+        X = {}
+        y = {}
+        optical_flows = {}
+        motion_representations = {}
         
+        X[action_dir_name] = []
+        y[action_dir_name] = []
+        optical_flows[action_dir_name] = []
+        motion_representations[action_dir_name] = []
+
+        return X, y, optical_flows, motion_representations
+

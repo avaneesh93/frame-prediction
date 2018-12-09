@@ -11,8 +11,9 @@ import sys
 import pickle
 import klepto
 import numpy as np
+import gc
 
-def save_as_pickled_object(obj, filepath, var_name = None):
+def save_as_pickled_object(obj, filepath, var_name = None, key = None):
     """
     This is a defensive way to write pickle.write, allowing for very large files on all platforms
     """
@@ -23,9 +24,18 @@ def save_as_pickled_object(obj, filepath, var_name = None):
     #     for idx in range(0, n_bytes, max_bytes):
     #         f_out.write(bytes_out[idx:idx+max_bytes])
     d = klepto.archives.dir_archive(filepath, cached=True, serialized=True)
-    d[var_name] = obj
-    d.dump()
+    d.load(var_name)
+    if var_name in d:
+        if key in d[var_name]:
+            d[var_name][key] = np.concatenate((d[var_name][key], obj))
+        else:
+            d[var_name][key] = obj
+    else:
+        d[var_name] = {}
+        d[var_name][key] = obj
+    d.sync()
     d.clear()
+    gc.collect()
 
 
 def try_to_load_as_pickled_object_or_None(filepath, var_name = None):
