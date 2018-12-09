@@ -156,7 +156,8 @@ class dataset_loader():
                                 data_logger.info('Writing training and test sets to disk')
                                 self.archive(X, y, optical_flows, motion_representations, action_dir_name, load_path)
                                 X, y, optical_flows, motion_representations = self.init_dicts(action_dir_name)
-                    if len(X[action_dir_name] > 0):
+                    if len(X[action_dir_name]) > 0:
+                        data_logger.info('Writing remaining training and test sets to disk')
                         self.archive(X, y, optical_flows, motion_representations, action_dir_name, load_path)
                 
         data_logger.info('Success! Completed loading the data!')
