@@ -42,7 +42,7 @@ def train_model(X_train, y_train, delta_t, optical_flows_train, motion_represent
     save_path = os.path.dirname(os.getcwd()) + '/results'   
     tf.reset_default_graph()
     
-    with tf.device('/gpu:0'):
+    with tf.device('/device:GPU:0'):
         
         # initialize tf variables
         is_training = tf.placeholder(tf.bool, name='is_training')

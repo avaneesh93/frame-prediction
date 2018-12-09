@@ -36,7 +36,7 @@ def test_model(X_test, y_test, dt, optical_flows_test):
     restore_path = os.path.dirname(os.getcwd()) + '/results/model.ckpt' 
     tf.reset_default_graph()
     
-    with tf.device('/gpu:0'):
+    with tf.device('/device:GPU:0'):
         
         # initialize tf variables
         is_training = tf.placeholder(tf.bool, name='is_training')
