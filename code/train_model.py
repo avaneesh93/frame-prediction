@@ -82,7 +82,7 @@ def train_model(X_train, y_train, delta_t, optical_flows_train, motion_represent
             # first, call the get_batch() function to gather batches of training data
             X_, y_, OF_, MR_ = get_batches(X_train, y_train, optical_flows_train, motion_representations_train)
             
-            for j in range(1, X_.shape[0]+1):
+            for j in range(X_.shape[0]):
  
                 # setup the feed dictionary (avoid naming conflicts!)
                 feed = {X_batch : X_[j], y_batch : y_[j], delta_t_batch : np.ones((16, 1)) * delta_t, 
