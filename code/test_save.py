@@ -10,32 +10,30 @@ def test_save(X_train, y_train, dt, optical_flows_train, motion_representations_
 
     save_path = os.path.dirname(os.getcwd()) + '/results'
     restore_path = os.path.dirname(os.getcwd()) + '/model/model.ckpt' 
-    tf.reset_default_graph()
 
     with tf.device('/device:GPU:0'):
         
-        # initialize tf variables
-        is_training = tf.placeholder(tf.bool, name='is_training')
-        X = tf.placeholder(tf.float32, [None, 120, 120, 1])
-        y = tf.placeholder(tf.float32, [None, 120, 120, 1])
-        delta_t = tf.placeholder(tf.float32, [None, 1])
-        optical_flows = tf.placeholder(tf.float32, [None, 120, 120, 1])
-        motion_representations = tf.placeholder(tf.float32, [None, 120, 120, 1])
+        # call function to compute forward pas
+        # init = tf.global_variables_initializer()
         
-        # call function to compute forward pass
-        model_out = encoder_decoder_pass(X, delta_t, optical_flows, is_training)
-        losses = tf.losses.mean_squared_error(labels = y * 255.0, predictions = model_out)
-        # losses *= (motion_representations_batch) 
-        loss = tf.reduce_mean(losses)
-        init = tf.global_variables_initializer()
-        saver = tf.train.import_meta_graph(restore_path + '.meta')
 
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         
         try:
-            print('Loading the trained model saved previously.')
-            sess.run(init)
+            # sess.run(init)
+            saver = tf.train.import_meta_graph(restore_path + '.meta')
             saver.restore(sess, restore_path)
+            print('Loading the trained model saved previously.')
+
+            graph = tf.get_default_graph()
+            is_training = graph.get_tensor_by_name("is_training:0")
+            X = graph.get_tensor_by_name("X_batch:0")
+            y = graph.get_tensor_by_name("y_batch:0")
+            delta_t = graph.get_tensor_by_name("delta_t_batch:0")
+            optical_flows = graph.get_tensor_by_name("optical_flows_batch:0")
+            motion_representations = graph.get_tensor_by_name("motion_representations_batch:0")
+            loss = graph.get_tensor_by_name("loss:0")
+            
         except:
             raise ValueError('No trained model found. Train a model and then try again!')
 
