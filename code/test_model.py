@@ -45,7 +45,7 @@ def test_model(X_test, y_test, dt, optical_flows_test):
         optical_flows = tf.placeholder(tf.float32, [None, 120, 120, 1])
         
         # call function to compute forward pass
-        model_out = encoder_decoder_pass(X, delta_t, optical_flows, is_training) * 255.0
+        model_out = encoder_decoder_pass(X, delta_t, optical_flows, is_training)
         saver = tf.train.Saver()
     
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
@@ -68,7 +68,7 @@ def test_model(X_test, y_test, dt, optical_flows_test):
         model_logger.info('Total number of batches to test = {}'.format(len(X_test_batches)))
 
         for batch_index in range(len(X_test_batches)):
-            if (batch_index + 1)%10:
+            if (batch_index + 1)%10 == 0:
                 model_logger.info('Testing batch {}'.format(batch_index+1))
             feed = {X: X_test_batches[batch_index], delta_t : np.ones((X_test_batches[batch_index].shape[0], 1)) * dt, 
                         optical_flows : optical_flows_test_batches[batch_index], is_training : False}
@@ -85,7 +85,7 @@ def test_model(X_test, y_test, dt, optical_flows_test):
  
         # convert predictions to images and save them for analysis
         for img_idx in range(test_predictions.shape[0]):
-            cv.imwrite(os.path.join(save_path, 'inputs/input_{}.jpg'.format(img_idx + 1)), X_test[img_idx])
+            cv.imwrite(os.path.join(save_path, 'inputs/input_{}.jpg'.format(img_idx + 1)), X_test[img_idx] * 255.0)
             cv.imwrite(os.path.join(save_path, 'predictions/prediction_{}.jpg'.format(img_idx + 1)), test_predictions[img_idx])
             cv.imwrite(os.path.join(save_path, 'targets/target_{}.jpg'.format(img_idx + 1)), y_test[img_idx] * 255.0)
         
