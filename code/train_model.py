@@ -58,7 +58,7 @@ def train_model(X_train, y_train, delta_t, optical_flows_train, motion_represent
         
         # loss computation
         losses = tf.losses.mean_squared_error(labels = y_batch * 255.0, predictions = model_out)
-        # losses *= (motion_representations_batch) 
+        losses *= (motion_representations_batch) 
         loss = tf.reduce_mean(losses)
         optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate)
         
