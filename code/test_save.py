@@ -23,16 +23,16 @@ def test_save(X_train, y_train, dt, optical_flows_train, motion_representations_
             # sess.run(init)
             saver = tf.train.import_meta_graph(restore_path + '.meta')
             saver.restore(sess, restore_path)
-            print('Loading the trained model saved previously.')
+            # print('Loading the trained model saved previously.')
 
             graph = tf.get_default_graph()
             is_training = graph.get_tensor_by_name("is_training:0")
-            X = graph.get_tensor_by_name("X_batch:0")
-            y = graph.get_tensor_by_name("y_batch:0")
-            delta_t = graph.get_tensor_by_name("delta_t_batch:0")
-            optical_flows = graph.get_tensor_by_name("optical_flows_batch:0")
-            motion_representations = graph.get_tensor_by_name("motion_representations_batch:0")
-            loss = graph.get_tensor_by_name("loss:0")
+            X = graph.get_tensor_by_name("Placeholder_1:0")
+            y = graph.get_tensor_by_name("Placeholder_2:0")
+            delta_t = graph.get_tensor_by_name("Placeholder_3:0")
+            optical_flows = graph.get_tensor_by_name("Placeholder_4:0")
+            motion_representations = graph.get_tensor_by_name("Placeholder_5:0")
+            loss = graph.get_tensor_by_name("Mean:0")
             
         except:
             raise ValueError('No trained model found. Train a model and then try again!')
