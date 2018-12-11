@@ -31,7 +31,7 @@ y_test = data.y_test['walking']
 opt_flows_test = data.optical_flows_test['walking']
 
 # now, tune the model
-learning_rates = [1e-9, 1e-8, 1e-7, 1e-6, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1]
+learning_rates = [5e-4, 1e-2, 1e-1]
 losses = []
 best_rate = None
 best_loss = np.inf

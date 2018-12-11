@@ -113,4 +113,4 @@ if __name__ == '__main__':
       
     data = dataset_loader(delta_t = 40.0, k = 10, offset = 10)  
     model_logger.info('Starting training procedure now.')
-    train_model(data.X_train['walking'], data.y_train['walking'], data.delta_t, data.optical_flows_train['walking'], data.motion_representations_train['walking'], 5e-4, 1, print_every = 1)
+    train_model(data.X_train['walking'], data.y_train['walking'], data.delta_t, data.optical_flows_train['walking'], data.motion_representations_train['walking'], lr = 1e-5, epochs = 150, tune = False, print_every = 1)
