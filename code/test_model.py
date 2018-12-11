@@ -68,7 +68,8 @@ def test_model(X_test, y_test, dt, optical_flows_test):
         model_logger.info('Total number of batches to test = {}'.format(len(X_test_batches)))
 
         for batch_index in range(len(X_test_batches)):
-            model_logger.info('Testing batch {}'.format(batch_index+1))
+            if (batch_index + 1)%10:
+                model_logger.info('Testing batch {}'.format(batch_index+1))
             feed = {X: X_test_batches[batch_index], delta_t : np.ones((X_test_batches[batch_index].shape[0], 1)) * dt, 
                         optical_flows : optical_flows_test_batches[batch_index], is_training : False}
             new_test_predictions = sess.run(model_out, feed_dict = feed) * 255.0 # these are normalized outputs. Transform back.
@@ -84,9 +85,9 @@ def test_model(X_test, y_test, dt, optical_flows_test):
  
         # convert predictions to images and save them for analysis
         for img_idx in range(test_predictions.shape[0]):
-            cv.imwrite(os.path.join(save_path, '/inputs/input_{}.jpg'.format(img_idx + 1)), X_test[img_idx])
-            cv.imwrite(os.path.join(save_path, '/predictions/prediction_{}.jpg'.format(img_idx + 1)), test_predictions[img_idx])
-            cv.imwrite(os.path.join(save_path, '/targets/target_{}.jpg'.format(img_idx + 1)), y_test[img_idx] * 255.0)
+            cv.imwrite(os.path.join(save_path, 'inputs/input_{}.jpg'.format(img_idx + 1)), X_test[img_idx])
+            cv.imwrite(os.path.join(save_path, 'predictions/prediction_{}.jpg'.format(img_idx + 1)), test_predictions[img_idx])
+            cv.imwrite(os.path.join(save_path, 'targets/target_{}.jpg'.format(img_idx + 1)), y_test[img_idx] * 255.0)
         
         model_logger.info('Saved all input, predicted and target images(.jpg format) to results directory.')
     
