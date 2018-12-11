@@ -11,7 +11,7 @@ def test_save(X_train, y_train, dt, optical_flows_train, motion_representations_
     save_path = os.path.dirname(os.getcwd()) + '/results'
     restore_path = os.path.dirname(os.getcwd()) + '/model/model.ckpt' 
 
-    with tf.device('/device:GPU:0'):
+    #with tf.device('/device:GPU:0'):
         
         # call function to compute forward pas
         # init = tf.global_variables_initializer()
@@ -23,7 +23,7 @@ def test_save(X_train, y_train, dt, optical_flows_train, motion_representations_
             # sess.run(init)
             saver = tf.train.import_meta_graph(restore_path + '.meta')
             saver.restore(sess, restore_path)
-            # print('Loading the trained model saved previously.')
+            print('Loading the trained model saved previously.')
 
             graph = tf.get_default_graph()
             is_training = graph.get_tensor_by_name("is_training:0")
