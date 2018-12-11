@@ -33,7 +33,7 @@ def test_model(X_test, y_test, dt, optical_flows_test):
     """
     
     save_path = os.path.dirname(os.getcwd()) + '/results'
-    restore_path = os.path.dirname(os.getcwd()) + '/results/model.ckpt' 
+    restore_path = os.path.dirname(os.getcwd()) + '/model/model.ckpt' 
     tf.reset_default_graph()
     
     with tf.device('/device:GPU:0'):
