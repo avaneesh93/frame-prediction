@@ -24,15 +24,16 @@ def test_save(X_train, y_train, dt, optical_flows_train, motion_representations_
         
         # call function to compute forward pass
         model_out = encoder_decoder_pass(X, delta_t, optical_flows, is_training)
-        losses = tf.losses.mean_squared_error(labels = y_batch * 255.0, predictions = model_out)
+        losses = tf.losses.mean_squared_error(labels = y * 255.0, predictions = model_out)
         # losses *= (motion_representations_batch) 
         loss = tf.reduce_mean(losses)
+        saver = tf.train.import_meta_graph(restore_path + '.meta')
 
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         
         try:
             saver.restore(sess, restore_path)
-            model_logger.info('Loading the trained model saved previously.')
+            print('Loading the trained model saved previously.')
             
         except:
             raise ValueError('No trained model found. Train a model and then try again!')
@@ -49,5 +50,5 @@ if __name__ == '__main__':
       
     data = dataset_loader(delta_t = 40.0, k = 10, offset = 10) # make sure pickled data is loaded. should use data identical/comparable to training data. 
     
-    model_logger.info('Starting testing procedure now.')
+    print('Starting testing procedure now.')
     test_save(data.X_train['walking'], data.y_train['walking'], data.delta_t, data.optical_flows_train['walking'], data.motion_representations_train['walking'])

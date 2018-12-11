@@ -46,7 +46,7 @@ def test_model(X_test, y_test, dt, optical_flows_test):
         
         # call function to compute forward pass
         model_out = encoder_decoder_pass(X, delta_t, optical_flows, is_training)
-        saver = tf.train.Saver()
+        saver = tf.train.import_meta_graph(restore_path + '.meta')
     
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         
