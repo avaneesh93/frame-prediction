@@ -27,14 +27,15 @@ def test_save(X_train, y_train, dt, optical_flows_train, motion_representations_
         losses = tf.losses.mean_squared_error(labels = y * 255.0, predictions = model_out)
         # losses *= (motion_representations_batch) 
         loss = tf.reduce_mean(losses)
+        init = tf.global_variables_initializer()
         saver = tf.train.import_meta_graph(restore_path + '.meta')
 
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         
         try:
-            saver.restore(sess, restore_path)
             print('Loading the trained model saved previously.')
-            
+            sess.run(init)
+            saver.restore(sess, restore_path)
         except:
             raise ValueError('No trained model found. Train a model and then try again!')
 
