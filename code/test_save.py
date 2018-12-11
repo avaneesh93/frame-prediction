@@ -50,4 +50,4 @@ if __name__ == '__main__':
     data = dataset_loader(delta_t = 40.0, k = 10, offset = 10) # make sure pickled data is loaded. should use data identical/comparable to training data. 
     
     model_logger.info('Starting testing procedure now.')
-    test_model(data.X_test['walking'], data.y_test['walking'], data.delta_t, data.optical_flows_test['walking'])
+    test_save(data.X_test['walking'], data.y_test['walking'], data.delta_t, data.optical_flows_test['walking'], data.motion_representations_train['walking'])
