@@ -25,7 +25,7 @@ def test_save(X_train, y_train, dt, optical_flows_train, motion_representations_
         # call function to compute forward pass
         model_out = encoder_decoder_pass(X, delta_t, optical_flows, is_training)
         losses = tf.losses.mean_squared_error(labels = y * 255.0, predictions = model_out)
-        # losses *= (motion_representations_batch) 
+        losses *= (motion_representations_batch) 
         loss = tf.reduce_mean(losses)
         init = tf.global_variables_initializer()
         saver = tf.train.import_meta_graph(restore_path + '.meta')
