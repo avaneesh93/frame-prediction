@@ -36,25 +36,26 @@ def test_model(X_test, y_test, dt, optical_flows_test):
     restore_path = os.path.dirname(os.getcwd()) + '/model/model.ckpt' 
     tf.reset_default_graph()
     
-    with tf.device('/device:GPU:0'):
+    # with tf.device('/device:GPU:0'):
         
-        # initialize tf variables
-        is_training = tf.placeholder(tf.bool, name='is_training')
-        X = tf.placeholder(tf.float32, [None, 120, 120, 1])
-        delta_t = tf.placeholder(tf.float32, [None, 1])
-        optical_flows = tf.placeholder(tf.float32, [None, 120, 120, 1])
-        
-        # call function to compute forward pass
-        model_out = encoder_decoder_pass(X, delta_t, optical_flows, is_training)
-        init = tf.global_variables_initializer()
-        saver = tf.train.import_meta_graph(restore_path + '.meta')
     
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
         
         try:
             model_logger.info('Loading the trained model saved previously.')
-            sess.run(init)
-            saver.restore(sess, restore_path)    
+            saver = tf.train.import_meta_graph(restore_path + '.meta')
+            saver.restore(sess, restore_path)
+
+            graph = tf.get_default_graph()
+            is_training = graph.get_tensor_by_name("is_training:0")
+            X = graph.get_tensor_by_name("Placeholder_1:0")
+            y = graph.get_tensor_by_name("Placeholder_2:0")
+            delta_t = graph.get_tensor_by_name("Placeholder_3:0")
+            optical_flows = graph.get_tensor_by_name("Placeholder_4:0")
+            motion_representations = graph.get_tensor_by_name("Placeholder_5:0")
+            model_out = graph.get_tensor_by_name("mul:0")
+
+
         except:
             raise ValueError('No trained model found. Train a model and then try again!')
             
