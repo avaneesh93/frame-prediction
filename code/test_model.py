@@ -72,7 +72,9 @@ def test_model(X_test, y_test, dt, optical_flows_test):
                 model_logger.info('Testing batch {}'.format(batch_index+1))
             feed = {X: X_test_batches[batch_index], delta_t : np.ones((X_test_batches[batch_index].shape[0], 1)) * dt, 
                         optical_flows : optical_flows_test_batches[batch_index], is_training : False}
-            new_test_predictions = sess.run(model_out, feed_dict = feed) * 255.0 # these are normalized outputs. Transform back.
+            new_test_predictions = sess.run(model_out, feed_dict = feed) # these are normalized outputs. Transform back.
+            new_test_predictions = new_test_predictions/(np.max(new_test_predictions, axis=(1,2,3))[:, None, None, None])
+            new_test_predictions *= 255.0
             if test_predictions is None:
                 test_predictions = new_test_predictions
             else:
