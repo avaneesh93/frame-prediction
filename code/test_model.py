@@ -60,14 +60,24 @@ def test_model(X_test, y_test, dt, optical_flows_test):
         model_logger.info('Checking model performance on test data now. Process starting.')
         
         test_size = X_test.shape[0]
-        feed = {X: X_test, delta_t : np.ones((test_size, 1)) * dt, 
-                    optical_flows : optical_flows_test, is_training : False}
-        test_predictions = sess.run(model_out, feed_dict = feed) * 255.0 # these are normalized outputs. Transform back.
+
+        X_test_batches = np.split(X_test, np.arange(16, test_size, 16))
+        optical_flows_test_batches = np.split(optical_flows_test, np.arange(16, test_size, 16))
+        test_predictions = None
+
+        for batch_index in range(len(X_test_batches)):
+            feed = {X: X_test_batches[batch_index], delta_t : np.ones((test_size, 1)) * dt, 
+                        optical_flows : optical_flows_test_batches[batch_index], is_training : False}
+            new_test_predictions = sess.run(model_out, feed_dict = feed) * 255.0 # these are normalized outputs. Transform back.
+            if test_predictions is None:
+                test_predictions = new_test_predictions
+            else:
+                test_predictions = np.concatenate((test_predictions, new_test_predictions))
         
         # save predictions to avoid re-run
-        with open(save_path + '/test_predictions.pkl', 'wb') as t:
-            pickle.dump(test_predictions, t) 
-        model_logger.info('Dumped test predictions.')
+        # with open(save_path + '/test_predictions.pkl', 'wb') as t:
+        #     pickle.dump(test_predictions, t) 
+        # model_logger.info('Dumped test predictions.')
  
         # convert predictions to images and save them for analysis
         for img_idx in range(test_predictions.shape[0]):
