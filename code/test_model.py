@@ -65,7 +65,10 @@ def test_model(X_test, y_test, dt, optical_flows_test):
         optical_flows_test_batches = np.split(optical_flows_test, np.arange(16, test_size, 16))
         test_predictions = None
 
+        model_logger.info('Total number of batches to test = {}'.format(len(X_test_batches)))
+
         for batch_index in range(len(X_test_batches)):
+            model_logger.info('Testing batch {}'.format(batch_index+1))
             feed = {X: X_test_batches[batch_index], delta_t : np.ones((test_size, 1)) * dt, 
                         optical_flows : optical_flows_test_batches[batch_index], is_training : False}
             new_test_predictions = sess.run(model_out, feed_dict = feed) * 255.0 # these are normalized outputs. Transform back.
