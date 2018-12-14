@@ -46,20 +46,20 @@ def train_model(X_train, y_train, delta_t, optical_flows_train, motion_represent
         
         # initialize tf variables
         is_training = tf.placeholder(tf.bool, name='is_training')
-        learning_rate = tf.placeholder(tf.float32)
-        X_batch = tf.placeholder(tf.float32, [None, 120, 120, 1])
-        y_batch = tf.placeholder(tf.float32, [None, 120, 120, 1])
-        delta_t_batch = tf.placeholder(tf.float32, [None, 1])
-        optical_flows_batch = tf.placeholder(tf.float32, [None, 120, 120, 1])
-        motion_representations_batch = tf.placeholder(tf.float32, [None, 120, 120, 1])
+        learning_rate = tf.placeholder(tf.float32, name='learning_rate')
+        X_batch = tf.placeholder(tf.float32, shape=[None, 120, 120, 1], name='X_batch')
+        y_batch = tf.placeholder(tf.float32, shape=[None, 120, 120, 1], name='y_batch')
+        delta_t_batch = tf.placeholder(tf.float32, shape=[None, 1], name='delta_t_batch')
+        optical_flows_batch = tf.placeholder(tf.float32, shape=[None, 120, 120, 1], name='optical_flows_batch')
+        motion_representations_batch = tf.placeholder(tf.float32, shape=[None, 120, 120, 1], name='motion_representations_batch')
         
         # call function to compute forward pass
-        model_out = encoder_decoder_pass(X_batch, delta_t_batch, optical_flows_batch, is_training) * 255.0
+        model_out = encoder_decoder_pass(X_batch, delta_t_batch, optical_flows_batch, is_training)
         
         # loss computation
-        losses = tf.losses.mean_squared_error(labels = y_batch * 255.0, predictions = model_out)
+        losses = tf.losses.mean_squared_error(labels = y_batch * 255.0, predictions = model_out * 255.0)
         losses *= (motion_representations_batch) 
-        loss = tf.reduce_mean(losses)
+        loss = tf.reduce_mean(losses, name='loss')
         optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate)
         
         # weight updates
