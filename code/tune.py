@@ -31,7 +31,7 @@ y_test = data.y_test['walking']
 opt_flows_test = data.optical_flows_test['walking']
 
 # now, tune the model
-learning_rates = [5e-5, 1e-5, 5e-4]
+learning_rates = [1e-5]
 losses = []
 best_rate = None
 best_loss = np.inf
@@ -54,9 +54,9 @@ plt.figure(figsize=(14, 8))
 # visualize results
 losses = np.array(losses)
 plt.plot(losses[0], '-o')
-plt.plot(losses[1], '-r')
-plt.plot(losses[2], '-b')
-plt.legend(['5e-5', '1e-5', '5e-4'], loc='upper right')
+# plt.plot(losses[1], '-r')
+# plt.plot(losses[2], '-b')
+plt.legend(['1e-5'], loc='upper right')
 plt.xlabel('epochs')
 plt.ylabel('losses')
 plt.savefig('graph.png')

@@ -50,7 +50,7 @@ def test_model(X_test, y_test, dt, optical_flows_test):
             delta_t = graph.get_tensor_by_name("delta_t_batch:0")
             optical_flows = graph.get_tensor_by_name("optical_flows_batch:0")
             motion_representations = graph.get_tensor_by_name("motion_representations_batch:0")
-            model_out = graph.get_tensor_by_name("model_out:0")
+            model_out = graph.get_tensor_by_name("model_out_norm:0")
 
 
         except:

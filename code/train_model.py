@@ -55,9 +55,10 @@ def train_model(X_train, y_train, delta_t, optical_flows_train, motion_represent
         
         # call function to compute forward pass
         model_out = encoder_decoder_pass(X_batch, delta_t_batch, optical_flows_batch, is_training)
-        
+        model_out_max = tf.reduce_max(model_out, axis=[1,2,3], keepdims=True, name='model_out_max')
+        model_out_norm = tf.divide(model_out, model_out_max, name='model_out_norm')
         # loss computation
-        losses = tf.losses.mean_squared_error(labels = y_batch * 255.0, predictions = model_out * 255.0)
+        losses = tf.losses.mean_squared_error(labels = y_batch * 255.0, predictions = model_out_norm * 255.0)
         losses *= (motion_representations_batch) 
         loss = tf.reduce_mean(losses, name='loss')
         optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate)
@@ -113,4 +114,4 @@ if __name__ == '__main__':
       
     data = dataset_loader(delta_t = 40.0, k = 10, offset = 10)  
     model_logger.info('Starting training procedure now.')
-    train_model(data.X_train['walking'], data.y_train['walking'], data.delta_t, data.optical_flows_train['walking'], data.motion_representations_train['walking'], lr = 1e-5, epochs = 150, tune = False, print_every = 1)
+    train_model(data.X_train['walking'], data.y_train['walking'], data.delta_t, data.optical_flows_train['walking'], data.motion_representations_train['walking'], lr = 1e-5, epochs = 200, tune = False, print_every = 1)
