@@ -31,7 +31,7 @@ y_test = data.y_test['walking']
 opt_flows_test = data.optical_flows_test['walking']
 
 # now, tune the model
-learning_rates = [5e-4, 1e-2, 1e-1]
+learning_rates = [5e-5, 1e-5, 5e-4]
 losses = []
 best_rate = None
 best_loss = np.inf
@@ -49,20 +49,14 @@ for lr in learning_rates:
     np.save(os.path.dirname(os.getcwd()) + '/tune/{}_lr'.format(lr), epoch_losses)
 print('Best learning rate found for 100 epochs of training {}'.format(best_rate))
 
-# plt.figure(figsize=(14, 8))
+plt.figure(figsize=(14, 8))
 
-# # visualize results
-# losses = np.array(losses)
-# plt.plot(losses[0], '-o')
-# plt.plot(losses[1], '-r')
-# plt.plot(losses[2], '-b')
-# plt.plot(losses[3], '-g')
-# plt.plot(losses[4], '-y')
-# plt.plot(losses[5], '-m')
-# plt.plot(losses[6], 'r+')
-# plt.plot(losses[7], 'b+')
-# plt.plot(losses[8], 'y+')
-# plt.legend(['1e-9', '1e-8', '1e-7', '1e-6','1e-5', '1e-4','1e-3','1e-2', '1e-1'], loc='upper right')
-# plt.xlabel('epochs')
-# plt.ylabel('losses')
-# plt.savefig('graph.png')
+# visualize results
+losses = np.array(losses)
+plt.plot(losses[0], '-o')
+plt.plot(losses[1], '-r')
+plt.plot(losses[2], '-b')
+plt.legend(['5e-5', '1e-5', '5e-4'], loc='upper right')
+plt.xlabel('epochs')
+plt.ylabel('losses')
+plt.savefig('graph.png')
