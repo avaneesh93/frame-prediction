@@ -11,13 +11,15 @@ import numpy as np
 import tensorflow as tf
 from dataset_loader import *
 from encode_decode import *
+from baseline import *
 
 import logging
 logging.basicConfig(level = logging.INFO)
 model_logger = logging.getLogger(__name__ + '.model_trainer')
 
 
-def train_model(X_train, y_train, delta_t, optical_flows_train, motion_representations_train, lr, epochs, tune, print_every = 1):
+def train_model(X_train, y_train, delta_t, optical_flows_train, motion_representations_train, 
+    baseline, lr, epochs, tune, print_every = 1):
     
     """                                 MODEL TRAINING PROCEDURE
     
@@ -54,12 +56,16 @@ def train_model(X_train, y_train, delta_t, optical_flows_train, motion_represent
         motion_representations_batch = tf.placeholder(tf.float32, shape=[None, 120, 120, 1], name='motion_representations_batch')
         
         # call function to compute forward pass
-        model_out = encoder_decoder_pass(X_batch, delta_t_batch, optical_flows_batch, is_training)
+        if baseline:
+            model_out = baseline_pass(X_batch, delta_t_batch, optical_flows_batch, is_training)
+        else:
+            model_out = encoder_decoder_pass(X_batch, delta_t_batch, optical_flows_batch, is_training)
         model_out_max = tf.reduce_max(model_out, axis=[1,2,3], keepdims=True, name='model_out_max')
         model_out_norm = tf.divide(model_out, model_out_max, name='model_out_norm')
         # loss computation
         losses = tf.losses.mean_squared_error(labels = y_batch * 255.0, predictions = model_out_norm * 255.0)
-        losses *= (motion_representations_batch) 
+        if not baseline:
+            losses *= (motion_representations_batch) 
         loss = tf.reduce_mean(losses, name='loss')
         optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate)
         
@@ -101,7 +107,10 @@ def train_model(X_train, y_train, delta_t, optical_flows_train, motion_represent
         model_logger.info("All epochs of training now complete.")
         
         if not tune:
-            saver.save(sess, save_path + '/model.ckpt') # save the trained model
+            if baseline:
+                saver.save(sess, save_path + '/model_baseline.ckpt') # save the trained model
+            else:
+                saver.save(sess, save_path + '/model.ckpt') # save the trained model
             model_logger.info('Saved the model to results directory.')
         
         model_logger.info('Training complete.')
@@ -114,4 +123,5 @@ if __name__ == '__main__':
       
     data = dataset_loader(delta_t = 40.0, k = 10, offset = 10)  
     model_logger.info('Starting training procedure now.')
-    train_model(data.X_train['walking'], data.y_train['walking'], data.delta_t, data.optical_flows_train['walking'], data.motion_representations_train['walking'], lr = 1e-5, epochs = 200, tune = False, print_every = 1)
+    train_model(data.X_train['walking'], data.y_train['walking'], data.delta_t, data.optical_flows_train['walking'], 
+        data.motion_representations_train['walking'], baseline = True, lr = 1e-3, epochs = 200, tune = False, print_every = 1)

@@ -39,8 +39,8 @@ best_loss = np.inf
 for lr in learning_rates:
     print('Training for learning rate {}'.format(lr))
     epoch_losses = train_model(X_train, y_train, dt, \
-                               opt_flows_train, motion_representations_train, lr, \
-                               epochs = 100, tune = True, print_every = 10)
+                               opt_flows_train, motion_representations_train, baseline = False, \
+                                lr, epochs = 100, tune = True, print_every = 10)
     print()
     losses.append(epoch_losses)
     if epoch_losses[-1] < best_loss:

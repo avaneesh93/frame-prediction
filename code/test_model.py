@@ -19,7 +19,7 @@ logging.basicConfig(level = logging.INFO)
 model_logger = logging.getLogger(__name__ + '.model_tester')
 
 
-def test_model(X_test, y_test, dt, optical_flows_test):
+def test_model(X_test, y_test, dt, optical_flows_test, baseline = False):
     
     """                                 MODEL TESTING PROCEDURE
     
@@ -33,7 +33,10 @@ def test_model(X_test, y_test, dt, optical_flows_test):
     """
     
     save_path = os.path.dirname(os.getcwd()) + '/results'
-    restore_path = os.path.dirname(os.getcwd()) + '/model/model.ckpt' 
+    if baseline:
+        restore_path = os.path.dirname(os.getcwd()) + '/model/model_baseline.ckpt'
+    else:
+        restore_path = os.path.dirname(os.getcwd()) + '/model/model.ckpt' 
     tf.reset_default_graph()
     
     with tf.Session(config=tf.ConfigProto(allow_soft_placement=True)) as sess:
@@ -99,4 +102,4 @@ if __name__ == '__main__':
     data = dataset_loader(delta_t = 40.0, k = 10, offset = 10) # make sure pickled data is loaded. should use data identical/comparable to training data. 
     
     model_logger.info('Starting testing procedure now.')
-    test_model(data.X_test['walking'], data.y_test['walking'], data.delta_t, data.optical_flows_test['walking'])
+    test_model(data.X_test['walking'], data.y_test['walking'], data.delta_t, data.optical_flows_test['walking'], baseline = True)

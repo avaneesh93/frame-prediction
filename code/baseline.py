@@ -141,7 +141,8 @@ def baseline_pass(x, delta_t, optical_flows, is_training):
     # shape of unpool_3_out --> (N, 120, 120, 32)
     
     model_out = tf.layers.conv2d_transpose(unpool_3_out, filters = 1, kernel_size = [1, 1], strides = [1, 1], \
-                                              padding = 'valid', activation = activation_fn, kernel_initializer = initializer)
+                                              padding = 'valid', activation = activation_fn, 
+                                              kernel_initializer = initializer, name='model_out')
     # shape of model_out --> (N, 120, 120, 1)
 
     return model_out
