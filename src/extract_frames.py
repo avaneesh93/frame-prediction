@@ -1,6 +1,9 @@
 import os
 import cv2
 
+"""
+Extracts frames from videos in the dataset
+"""
 def extract(vids_dir, frames_dir):
     
     for vid in os.listdir(vids_dir):

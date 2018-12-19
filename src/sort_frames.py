@@ -1,6 +1,8 @@
 import os
 from shutil import copy2, rmtree
-
+"""
+Sorts extracted frames of walking dataset using seq.txt into sequence folders
+"""
 def sort(frames_dir, seq):
     count = 0
     with open(seq) as sf:
