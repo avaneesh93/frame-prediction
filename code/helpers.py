@@ -13,16 +13,10 @@ import klepto
 import numpy as np
 import gc
 
-def save_as_pickled_object(obj, filepath, var_name = None, key = None):
+def write_to_file(obj, filepath, var_name = None, key = None):
     """
-    This is a defensive way to write pickle.write, allowing for very large files on all platforms
+    Writes action sequence object to file.
     """
-    # max_bytes = 2**31 - 1
-    # bytes_out = pickle.dumps(obj)
-    # n_bytes = sys.getsizeof(bytes_out)
-    # with open(filepath, 'wb') as f_out:
-    #     for idx in range(0, n_bytes, max_bytes):
-    #         f_out.write(bytes_out[idx:idx+max_bytes])
     d = klepto.archives.dir_archive(filepath, cached=True, serialized=True)
     d.load(var_name)
     if var_name in d:
@@ -38,19 +32,10 @@ def save_as_pickled_object(obj, filepath, var_name = None, key = None):
     gc.collect()
 
 
-def try_to_load_as_pickled_object_or_None(filepath, var_name = None):
+def load_from_file(filepath, var_name = None):
     """
-    This is a defensive way to write pickle.load, allowing for very large files on all platforms
+    Loads action sequence object from file.
     """
-    # max_bytes = 2**31 - 1
-    
-    # input_size = os.path.getsize(filepath)
-    # bytes_in = bytearray(0)
-    # with open(filepath, 'rb') as f_in:
-    #     for _ in range(0, input_size, max_bytes):
-    #         bytes_in += f_in.read(max_bytes)
-    # obj = pickle.loads(bytes_in)
-
     d = klepto.archives.dir_archive(filepath, cached=True, serialized=True)
     d.load(var_name)
     obj = d[var_name]

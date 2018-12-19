@@ -81,12 +81,7 @@ def test_model(X_test, y_test, dt, optical_flows_test, baseline = False):
                 test_predictions = new_test_predictions
             else:
                 test_predictions = np.concatenate((test_predictions, new_test_predictions))
-        
-        # save predictions to avoid re-run
-        # with open(save_path + '/test_predictions.pkl', 'wb') as t:
-        #     pickle.dump(test_predictions, t) 
-        # model_logger.info('Dumped test predictions.')
- 
+
         # convert predictions to images and save them for analysis
         for img_idx in range(test_predictions.shape[0]):
             cv.imwrite(os.path.join(save_path, 'inputs/input_{}.jpg'.format(img_idx + 1)), X_test[img_idx] * 255.0)

@@ -199,4 +199,3 @@ def encoder_decoder_pass(x, delta_t, optical_flows, is_training):
     # shape of model_out --> (N, 120, 120, 1)
 
     return model_out
-    

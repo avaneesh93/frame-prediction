@@ -69,23 +69,14 @@ class dataset_loader():
                 and os.path.exists(optical_flows_train_path) and  os.path.exists(optical_flows_test_path) and  os.path.exists(motion_representations_train_path):
             
             data_logger.info('Pickled data available. Loading now!')
-            
-            #data_logger.info("Custom loading. Pickle loading couldn't handle this huge data size!")
-            # self.X_train = try_to_load_as_pickled_object_or_None(X_train_path)
-            # self.y_train = try_to_load_as_pickled_object_or_None(y_train_path)
-            # self.X_test = try_to_load_as_pickled_object_or_None(X_test_path)
-            # self.y_test = try_to_load_as_pickled_object_or_None(y_test_path)
-            # self.optical_flows_train = try_to_load_as_pickled_object_or_None(optical_flows_train_path)
-            # self.optical_flows_test = try_to_load_as_pickled_object_or_None(optical_flows_test_path)
-            # self.motion_representations_train = try_to_load_as_pickled_object_or_None(motion_representations_train_path)
 
-            self.X_train = try_to_load_as_pickled_object_or_None(load_path, 'X_train_dt_{}'.format(int(self.delta_t)))
-            self.y_train = try_to_load_as_pickled_object_or_None(load_path, 'y_train_dt_{}'.format(int(self.delta_t)))
-            self.X_test = try_to_load_as_pickled_object_or_None(load_path, 'X_test_dt_{}'.format(int(self.delta_t)))
-            self.y_test = try_to_load_as_pickled_object_or_None(load_path, 'y_test_dt_{}'.format(int(self.delta_t)))
-            self.optical_flows_train = try_to_load_as_pickled_object_or_None(load_path, 'optical_flows_train_dt_{}'.format(int(self.delta_t)))
-            self.optical_flows_test = try_to_load_as_pickled_object_or_None(load_path, 'optical_flows_test_dt_{}'.format(int(self.delta_t)))
-            self.motion_representations_train = try_to_load_as_pickled_object_or_None(load_path, 'motion_representations_train_dt_{}'.format(int(self.delta_t)))
+            self.X_train = load_from_file(load_path, 'X_train_dt_{}'.format(int(self.delta_t)))
+            self.y_train = load_from_file(load_path, 'y_train_dt_{}'.format(int(self.delta_t)))
+            self.X_test = load_from_file(load_path, 'X_test_dt_{}'.format(int(self.delta_t)))
+            self.y_test = load_from_file(load_path, 'y_test_dt_{}'.format(int(self.delta_t)))
+            self.optical_flows_train = load_from_file(load_path, 'optical_flows_train_dt_{}'.format(int(self.delta_t)))
+            self.optical_flows_test = load_from_file(load_path, 'optical_flows_test_dt_{}'.format(int(self.delta_t)))
+            self.motion_representations_train = load_from_file(load_path, 'motion_representations_train_dt_{}'.format(int(self.delta_t)))
             
                 
                 
@@ -206,13 +197,13 @@ class dataset_loader():
             self.optical_flows_test[action_dir_name] = new_optical_flows_test
             self.motion_representations_train[action_dir_name] = new_motion_representations_train
 
-        save_as_pickled_object(new_X_train, path, 'X_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
-        save_as_pickled_object(new_y_train, path, 'y_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
-        save_as_pickled_object(new_X_test, path, 'X_test_dt_{}'.format(int(self.delta_t)), action_dir_name)
-        save_as_pickled_object(new_y_test, path, 'y_test_dt_{}'.format(int(self.delta_t)), action_dir_name)
-        save_as_pickled_object(new_optical_flows_train, path, 'optical_flows_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
-        save_as_pickled_object(new_optical_flows_test, path, 'optical_flows_test_dt_{}'.format(int(self.delta_t)), action_dir_name)
-        save_as_pickled_object(new_motion_representations_train, path, 'motion_representations_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        write_to_file(new_X_train, path, 'X_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        write_to_file(new_y_train, path, 'y_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        write_to_file(new_X_test, path, 'X_test_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        write_to_file(new_y_test, path, 'y_test_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        write_to_file(new_optical_flows_train, path, 'optical_flows_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        write_to_file(new_optical_flows_test, path, 'optical_flows_test_dt_{}'.format(int(self.delta_t)), action_dir_name)
+        write_to_file(new_motion_representations_train, path, 'motion_representations_train_dt_{}'.format(int(self.delta_t)), action_dir_name)
 
     def init_dicts(self, action_dir_name):
         # Initializing batches
@@ -227,4 +218,3 @@ class dataset_loader():
         motion_representations[action_dir_name] = []
 
         return X, y, optical_flows, motion_representations
-
