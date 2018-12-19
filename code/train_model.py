@@ -40,6 +40,11 @@ def train_model(X_train, y_train, delta_t, optical_flows_train, motion_represent
         param tune : a boolean indicating whether this train function is called during a hyperparameter tuning procedure
         param print_every : prints training stats after each set of this number of epochs; type --> int
     """     
+
+    if baseline:
+        model_logger.info('Training BASELINE MODEL')
+    else:
+        model_logger.info('Training AUGMENTED MODEL')
     
     save_path = os.path.dirname(os.getcwd()) + '/model'   
     tf.reset_default_graph()
@@ -57,8 +62,10 @@ def train_model(X_train, y_train, delta_t, optical_flows_train, motion_represent
         
         # call function to compute forward pass
         if baseline:
+            model_logger.info('Setting up graph for baseline graph...')
             model_out = baseline_pass(X_batch, delta_t_batch, optical_flows_batch, is_training)
         else:
+            model_logger.info('Setting up graph for augmented graph...')
             model_out = encoder_decoder_pass(X_batch, delta_t_batch, optical_flows_batch, is_training)
         model_out_max = tf.reduce_max(model_out, axis=[1,2,3], keepdims=True, name='model_out_max')
         model_out_norm = tf.divide(model_out, model_out_max, name='model_out_norm')
